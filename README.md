@@ -6,6 +6,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
+[繁體中文](README.md) | [English](README_EN.md)
+
 </div>
 
 ---
@@ -26,7 +28,8 @@
 
 ## 核心優勢
 
-- **真實文獻雙重稽核**：內建引用誠信模組，自動排查虛構論文，確保每篇文獻來源皆真實可查。
+- **真實文獻雙重稽核與 MCP 串接**：內建引用誠信模組並支援 MCP (Model Context Protocol) 串接，自動排查虛構論文，確保每篇文獻來源皆真實可查。
+- **自動化排版與精算腳本**：提供專屬 Python 腳本，一鍵精算頁數是否超過 10 頁，並直接將 Markdown 匯出為符合國科會嚴格規定（標楷體 12pt、1.5 倍行高）的 Word 檔。
 - **評審視角 7 維度自審**：對照國科會 4 大審查重點，從原創性、論證、文獻、方法、清晰度、影響力與技術正確性進行模擬打分。
 - **結構化 10 頁 C802 配置**：精準分配摘要（0.5頁）、動機（1~1.5頁）、文獻探討（2.5~3頁）、方法（3~4頁）與預期成果（1頁），附帶 8 個月時程甘特圖。
 
@@ -71,6 +74,11 @@
 ```
 nstc-undergrad-grant/
 ├── SKILL.md                        # 主技能檔案：完整引導工作流程（Step 0~6）
+├── mcp_config.json                 # MCP 伺服器設定檔 (防幻覺與真實文獻 API 搜尋)
+├── scripts/                        # 自動化輔助腳本
+│   ├── export_c802.py              # 一鍵匯出符合國科會排版規範的 Word 檔
+│   ├── check_budget.py             # 估算字數與圖表是否符合 10 頁版面限制
+│   └── requirements.txt            # Python 腳本相依套件
 ├── references/
 │   ├── nstc_format_rules.md        # 國科會制度、表號、格式規範與 10 大避坑清單
 │   ├── section_template.md         # 摘要黃金公式與各章節詳細寫法模板

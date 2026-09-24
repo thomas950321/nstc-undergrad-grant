@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "semantic-scholar": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-semantic-scholar"]
+    }
+  }
+}
