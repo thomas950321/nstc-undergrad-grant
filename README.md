@@ -32,6 +32,7 @@
 - **自動化排版與精算腳本**：提供 Python 腳本估算篇幅並將 Markdown 匯出為 Word；匯出後仍需以實際 PDF／Word 人工檢查頁數與跑版。
 - **評審視角 7 維度自審**：對照國科會 4 大審查重點，從原創性、論證、文獻、方法、清晰度、影響力與技術正確性進行模擬打分。
 - **結構化 C802 工作流**：依研究問題、證據、方法、時程與審查疑慮逐步產出，不為了湊頁數加入空泛內容。
+- **數據圖表可追溯渲染**：AI 可依據原始 JSON/CSV 產生 HTML/JavaScript 圖表，再由 Chromium 依真實數值渲染成 PNG，避免用影像模型猜測比例，最後嵌入 Word。
 
 ## 快速開始
 
@@ -52,6 +53,18 @@
 ```
 
 如果只有科系或模糊想法，Skill 不會直接代寫整份計畫，而會先詢問背景與限制，再提出 2～4 個研究方向讓你選擇。每次只推進一個決策：研究方向 → 研究問題 → 資料與對象 → 方法 → 文件草稿；你可以選編號、混合選項或要求重新產生方向。
+
+### 精確數據圖表流程
+
+對研究數據，請保留原始 JSON/CSV，讓 AI 產生 HTML/JavaScript 圖表，再交給 Chromium 依真實數值渲染，不要讓影像模型猜測比例：
+
+```bash
+python scripts/chart_from_data.py data.json chart.html
+python scripts/render_html.py chart.html chart.png
+python scripts/export_c802.py proposal.md proposal.docx
+```
+
+在 `proposal.md` 中使用 `![圖名](chart.png)`。匯出的 Word 會嵌入實際 PNG；原始數據欄位不一致或圖片不存在時，流程會停止並回報錯誤。
 
 ### 方式 B：手動複製技能資料夾
 
@@ -81,6 +94,9 @@ nstc-undergrad-grant/
 │   ├── export_c802.py              # 一鍵匯出符合國科會排版規範的 Word 檔
 │   ├── check_budget.py             # 估算字數與圖表是否符合 10 頁版面限制
 │   ├── validate_skill.py            # 檢查 skill metadata 與資源路徑
+│   ├── chart_from_data.py           # 將原始 JSON 數據產生 HTML/SVG 圖表
+│   ├── render_html.py               # 用 Chromium 將 HTML 圖表渲染成 PNG
+│   ├── fetch_image.py               # 下載遠端圖片供 Word 嵌入
 │   └── requirements.txt            # Python 腳本相依套件
 ├── references/
 │   ├── nstc_format_rules.md        # 國科會制度、表號、格式規範與 10 大避坑清單

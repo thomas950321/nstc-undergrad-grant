@@ -1,6 +1,11 @@
 import sys
 import re
 import os
+import io
+import tempfile
+from pathlib import Path
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 # Ensure stdout handles UTF-8 on Windows cp950 without crashing
 if hasattr(sys.stdout, 'reconfigure'):
@@ -75,6 +80,33 @@ def format_paragraph_text(p, text):
                 else:
                     p.add_run(b_tok)
 
+def load_image_source(source, base_dir):
+    """Return an actual image payload and its source URL/path.
+
+    Local Markdown paths are resolved relative to the Markdown file. HTTP(S)
+    sources are downloaded before insertion. A missing or non-image source is
+    a hard error: never replace an image with a text placeholder.
+    """
+    parsed = urlparse(source)
+    if parsed.scheme in ('http', 'https'):
+        request = Request(source, headers={'User-Agent': 'nstc-undergrad-grant-skill/1.0'})
+        with urlopen(request, timeout=30) as response:
+            content_type = response.headers.get_content_type().lower()
+            data = response.read()
+        if not content_type.startswith('image/'):
+            raise ValueError(f'遠端來源不是圖片：{source} ({content_type})')
+        if not data:
+            raise ValueError(f'遠端圖片為空：{source}')
+        return io.BytesIO(data), source
+
+    local_source = source[7:] if parsed.scheme == 'file' else source
+    local_path = Path(local_source)
+    if not local_path.is_absolute():
+        local_path = Path(base_dir) / local_path
+    if not local_path.is_file():
+        raise FileNotFoundError(f'找不到圖片檔：{local_path}')
+    return str(local_path), str(local_path)
+
 def parse_markdown_to_docx(md_path, docx_path):
     doc = Document()
     apply_nstc_style(doc)
@@ -83,6 +115,7 @@ def parse_markdown_to_docx(md_path, docx_path):
         content = f.read()
         
     lines = content.split('\n')
+    base_dir = Path(md_path).resolve().parent
     i = 0
     total_lines = len(lines)
     in_code_block = False
@@ -146,12 +179,12 @@ def parse_markdown_to_docx(md_path, docx_path):
             p_img = doc.add_paragraph()
             p_img.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             
-            if os.path.exists(img_src):
-                try:
-                    run_img = p_img.add_run()
-                    run_img.add_picture(img_src, width=Inches(5.5))
-                except Exception as e:
-                    p_img.add_run(f"[圖檔插入失敗: {img_src}]")
+            try:
+                image_payload, resolved_source = load_image_source(img_src, base_dir)
+                run_img = p_img.add_run()
+                run_img.add_picture(image_payload, width=Inches(5.5))
+            except Exception as e:
+                raise RuntimeError(f"圖片必須是可取得的實際檔案，無法嵌入：{img_src}；原因：{e}") from e
             
             p_cap = doc.add_paragraph()
             p_cap.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -160,8 +193,11 @@ def parse_markdown_to_docx(md_path, docx_path):
             
             p_src = doc.add_paragraph()
             p_src.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            p_src.add_run("（資料來源與連結：")
-            add_hyperlink(p_src, img_src, img_src)
+            p_src.add_run("（資料來源：")
+            if urlparse(img_src).scheme in ('http', 'https'):
+                add_hyperlink(p_src, img_src, img_src)
+            else:
+                p_src.add_run(str(resolved_source))
             p_src.add_run("）")
             
             i += 1

@@ -11,6 +11,7 @@ description: 協助台灣國科會大專學生研究計畫的選題、文獻查�
 - 只使用使用者提供、已查證來源或明確標示為假設的事實。不得補寫不存在的文獻、DOI、數據、成績、研究成果、受試者或教授承諾。
 - 保留使用者的研究主張與聲音；先提出問題與草稿結構，再潤飾文字。不要把未完成的假設寫成已完成的結果。
 - 優先產出可檢查的中間成果，而不是一次生成整份長文。每個重要數據、引用、圖表與規則都要能追溯到來源或輸入。
+- C802 中的圖表、照片、架構圖與流程圖必須以實際圖片檔嵌入 Word；Mermaid、ASCII、文字描述或 Unicode 圖案只能作為製圖來源，不能當成最終交付物。
 - 不代替學生、教授或學校送件、簽署、作出學術倫理聲明，也不處理未取得同意的個資、人體、動物或敏感資料。
 
 ## 觸發後的標準流程
@@ -87,6 +88,10 @@ used-in: 動機／文獻／方法／預算／圖表
 - 模擬審查：讀 `prompts/simulate_review.md` 與 `references/reviewer_checklist.md`，將每項批評轉成可執行修改，不把模擬等第說成正式評審結果。
 - 成果報告：沿用實際完成的研究、資料與結果；預期成果不可回填成已完成成果。
 
+圖片處理規則：需要外部圖片時，先使用 `python scripts/fetch_image.py <url> <output>` 下載實際圖片；需要生成圖片時，呼叫可用的圖片生成工具並保存輸出的 PNG/JPEG 檔。再以 Markdown 圖片語法 `![圖名](path-or-url)` 放入草稿，使用 `scripts/export_c802.py` 時會下載遠端圖片並把二進位圖片嵌入 DOCX。圖片不存在、來源不是圖片或下載失敗時必須中止匯出，不得改成文字提示或空白圖框。
+
+精確數據圖表規則：不要讓影像生成模型直接繪製數據、比例、座標或統計結果。先保留原始 CSV/JSON，讓 AI 產生或修改 HTML/JavaScript 圖表，再由瀏覽器依原始數值渲染。可使用 `python scripts/chart_from_data.py <data.json> <chart.html>` 產生可追溯的 HTML/SVG 圖表，再使用 `python scripts/render_html.py <chart.html> <chart.png>` 產生實際 PNG，最後用 `scripts/export_c802.py` 嵌入 Word。檢查 labels 與 values 等長、數值有限、單位與座標軸一致；圓餅圖另檢查總和大於零。HTML 圖表產生器不得自行捏造或改寫原始數據。
+
 每次輸出都要附「需要使用者／教授確認」欄，指出尚未證實的事實、引用、數字、圖表來源與表單欄位。
 
 ### 6. 格式、預算與引用驗證
@@ -128,4 +133,4 @@ used-in: 動機／文獻／方法／預算／圖表
 - 時程：`prompts/gantt.md`
 - 篇幅藍圖：`prompts/page_budget_planner.md`
 - 模擬審查：`prompts/simulate_review.md`
-- 工具：`scripts/check_budget.py`、`scripts/export_c802.py`
+- 工具：`scripts/check_budget.py`、`scripts/fetch_image.py`、`scripts/chart_from_data.py`、`scripts/render_html.py`、`scripts/export_c802.py`
