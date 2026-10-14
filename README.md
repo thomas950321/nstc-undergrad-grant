@@ -32,6 +32,7 @@
 - **自動化排版與精算腳本**：提供 Python 腳本估算篇幅並將 Markdown 匯出為 Word；匯出後仍需以實際 PDF／Word 人工檢查頁數與跑版。
 - **評審視角 7 維度自審**：對照國科會 4 大審查重點，從原創性、論證、文獻、方法、清晰度、影響力與技術正確性進行模擬打分。
 - **結構化 C802 工作流**：依研究問題、證據、方法、時程與審查疑慮逐步產出，不為了湊頁數加入空泛內容。
+- **研究證據台帳與階段閘門**：借鑑 `academic-research-skills` 的 human-in-the-loop 與可追溯交接設計，將外部主張固定到來源、locator、證據摘錄與驗證狀態；未驗證項目不會被悄悄寫成已證實。
 - **數據圖表可追溯渲染**：AI 可依據原始 JSON/CSV 產生 HTML/JavaScript 圖表，再由 Chromium 依真實數值渲染成 PNG，避免用影像模型猜測比例，最後嵌入 Word。
 
 ## 快速開始
@@ -84,6 +85,16 @@ python scripts/export_c802.py proposal.md proposal.docx
 6. **Step 5 送件前格式檢查**：核對 12pt 標楷體/Times New Roman、1.5 倍行高、PDF 無跑版與 C801~C804 表單完整性。
 7. **Step 6 成果報告撰寫**：計畫執行期滿後 1 個月內協助產出成果報告，維持創作獎評獎資格。
 
+### 證據台帳快速檢查
+
+先複製 `templates/evidence_ledger.json`，逐筆填入研究主張與可追溯來源，再執行：
+
+```bash
+python scripts/validate_evidence_ledger.py evidence_ledger.json
+```
+
+這個工具只檢查台帳結構、狀態與 provenance 欄位，不會假裝替你查證論文是否存在。`verified` 必須有核對日期與 locator；無法查清的項目保留 `needs-check`，並在 C802 草稿與最終交付的「待確認」清單中揭露。
+
 ## 專案結構
 
 ```
@@ -96,12 +107,16 @@ nstc-undergrad-grant/
 │   ├── validate_skill.py            # 檢查 skill metadata 與資源路徑
 │   ├── chart_from_data.py           # 將原始 JSON 數據產生 HTML/SVG 圖表
 │   ├── render_html.py               # 用 Chromium 將 HTML 圖表渲染成 PNG
-│   ├── fetch_image.py               # 下載遠端圖片供 Word 嵌入
+│   ├── fetch_image.py              # 下載遠端圖片供 Word 嵌入
+│   ├── validate_evidence_ledger.py # 驗證證據台帳結構與 provenance 欄位
 │   └── requirements.txt            # Python 腳本相依套件
 ├── references/
 │   ├── nstc_format_rules.md        # 國科會制度、表號、格式規範與 10 大避坑清單
 │   ├── section_template.md         # 摘要黃金公式與各章節詳細寫法模板
-│   └── reviewer_checklist.md       # 7 維度評審自審清單與國科會審查重點對照
+│   ├── reviewer_checklist.md       # 7 維度評審自審清單與國科會審查重點對照
+│   └── research_evidence_protocol.md # 證據層級、研究護照與兩道完整性閘門
+├── templates/
+│   └── evidence_ledger.json        # 可驗證的主張—來源台帳範本
 └── prompts/
     ├── abstract.md                 # 300 字摘要生成與 30 秒評審壓力測試 Prompt
     ├── gap_analysis.md             # 研究缺口矩陣與文獻真偽驗證 Prompt

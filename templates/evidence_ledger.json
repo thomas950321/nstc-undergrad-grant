@@ -1,0 +1,28 @@
+{
+  "schema_version": "nstc-evidence-ledger/1.0",
+  "research_question": "在此填入已確認的單一句研究問題",
+  "scope": {
+    "population": "",
+    "geography": "",
+    "timeframe": "",
+    "out_of_scope": []
+  },
+  "entries": [
+    {
+      "id": "E01",
+      "claim": "在此填入一個可被來源支持的單一主張",
+      "source": "作者或機構（年份）。標題或資料集名稱",
+      "locator": "DOI、官方 URL、頁碼、段落或檔案路徑",
+      "evidence": "在此填入可核對的原文摘錄、數值或結果摘要",
+      "status": "needs-check",
+      "used_in": ["motivation"],
+      "checked_at": "",
+      "notes": "核對限制、版本差異或需教授確認事項"
+    }
+  ],
+  "ethics_flags": [],
+  "user_confirmation": {
+    "status": "pending",
+    "confirmed_at": ""
+  }
+}
